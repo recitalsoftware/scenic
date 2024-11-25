@@ -12,6 +12,10 @@ module Scenic
     # @param materialized [Boolean, Hash] Set to true to create a materialized
     #   view. Set to { no_data: true } to create materialized view without
     #   loading data. Defaults to false.
+    # @param security_barrier [Boolean] Set to true to enable the security barrier
+    #   option on the view. Defaults to false.
+    # @param security_invoker [Boolean] Set to true to enable the security invoker
+    #   option on the view. Defaults to false.
     # @return The database response from executing the create statement.
     #
     # @example Create from `db/views/searches_v02.sql`
@@ -22,7 +26,8 @@ module Scenic
     #     SELECT * FROM users WHERE users.active = 't'
     #   SQL
     #
-    def create_view(name, version: nil, sql_definition: nil, materialized: false)
+    def create_view(name, version: nil, sql_definition: nil, materialized: false,
+      security_barrier: false, security_invoker: false)
       if version.present? && sql_definition.present?
         raise(
           ArgumentError,
@@ -43,7 +48,7 @@ module Scenic
           no_data: no_data(materialized)
         )
       else
-        Scenic.database.create_view(name, sql_definition)
+        Scenic.database.create_view(name, sql_definition, security_barrier, security_invoker)
       end
     end
 
@@ -83,12 +88,17 @@ module Scenic
     # @param materialized [Boolean, Hash] True if updating a materialized view.
     #   Set to { no_data: true } to update materialized view without loading
     #   data. Defaults to false.
+    # @param security_barrier [Boolean] Set to true to enable the security barrier
+    #   option on the view. Defaults to false.
+    # @param security_invoker [Boolean] Set to true to enable the security invoker
+    #   option on the view. Defaults to false.
     # @return The database response from executing the create statement.
     #
     # @example
     #   update_view :engagement_reports, version: 3, revert_to_version: 2
     #
-    def update_view(name, version: nil, sql_definition: nil, revert_to_version: nil, materialized: false)
+    def update_view(name, version: nil, sql_definition: nil, revert_to_version: nil, materialized: false,
+      security_barrier: false, security_invoker: false)
       if version.blank? && sql_definition.blank?
         raise(
           ArgumentError,
@@ -112,7 +122,7 @@ module Scenic
           no_data: no_data(materialized)
         )
       else
-        Scenic.database.update_view(name, sql_definition)
+        Scenic.database.update_view(name, sql_definition, security_barrier, security_invoker)
       end
     end
 
@@ -127,12 +137,17 @@ module Scenic
     # @param version [Fixnum] The version number of the view.
     # @param revert_to_version [Fixnum] The version number to rollback to on
     #   `rake db rollback`
+    # @param security_barrier [Boolean] Set to true to enable the security barrier
+    #   option on the view. Defaults to false.
+    # @param security_invoker [Boolean] Set to true to enable the security invoker
+    #   option on the view. Defaults to false.
     # @return The database response from executing the create statement.
     #
     # @example
     #   replace_view :engagement_reports, version: 3, revert_to_version: 2
     #
-    def replace_view(name, version: nil, revert_to_version: nil, materialized: false)
+    def replace_view(name, version: nil, revert_to_version: nil, materialized: false,
+      security_barrier: false, security_invoker: false)
       if version.blank?
         raise ArgumentError, "version is required"
       end
@@ -143,7 +158,7 @@ module Scenic
 
       sql_definition = definition(name, version)
 
-      Scenic.database.replace_view(name, sql_definition)
+      Scenic.database.replace_view(name, sql_definition, security_barrier, security_invoker)
     end
 
     private
